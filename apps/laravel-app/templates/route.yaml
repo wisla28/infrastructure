@@ -1,0 +1,19 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    cert-utils-operator.redhat-cop.io/certs-from-secret: {{ .Values.route.tls.secretName }}
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+spec:
+  to:
+    kind: Service
+    name: {{ .Release.Name }}
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  host: {{ .Values.route.host }}
+  path: /
+  port:
+    targetPort: http

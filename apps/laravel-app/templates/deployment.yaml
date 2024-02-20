@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "laravel-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "laravel-app.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-app
+            - configMapRef:
+                name: {{ .Release.Name }}-database
+            - configMapRef:
+                name: {{ .Release.Name }}-laravel
+            - configMapRef:
+                name: {{ .Release.Name }}-logging
+            {{- if .Values.redis.enabled }}
+            - configMapRef:
+                name: {{ .Release.Name }}-redis
+            {{- end }}
+            {{- if .Values.mail.enabled }}
+            - configMapRef:
+                name: {{ .Release.Name }}-mail
+            {{- end }}
+            - secretRef:
+                name: {{ .Release.Name }}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: laravel-bootstrap-cache
+              mountPath: /app/bootstrap/cache
+            - name: laravel-framework
+              mountPath: /app/storage/framework
+            - name: laravel-logs
+              mountPath: /app/storage/logs
+            - name: nginx-logs
+              mountPath: /var/log/nginx
+          resources:
+            requests:
+              cpu: {{ $.Values.resources.requests.cpu | quote }}
+              memory: {{ $.Values.resources.requests.memory | quote }}
+            limits:
+              cpu: {{ $.Values.resources.limits.cpu | quote }}
+              memory: {{ $.Values.resources.limits.memory | quote }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ .Release.Name }}
+              topologyKey: kubernetes.io/hostname
+      volumes:
+        - name: laravel-bootstrap-cache
+          emptyDir: {}
+        - name: laravel-framework
+          emptyDir: {}
+        - name: laravel-logs
+          emptyDir: {}
+        - name: nginx-logs
+          emptyDir: {}
