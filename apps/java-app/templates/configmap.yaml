@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "java-app.labels" . | nindent 4 }}
 data:
-  SPRING_PROFILES_ACTIVE: {{ $.Values.app.name | quote }}
+  SPRING_PROFILES_ACTIVE: {{ $.Values.spring.profiles.active | quote }}
   SERVER_PORT: '8080'
 
   DATASOURCE_URL: {{ $.Values.datasource.url | quote }}
