@@ -2,8 +2,10 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: {{ .Release.Name }}
+  {{- if .Values.route.tls.enabled }}
   annotations:
     cert-utils-operator.redhat-cop.io/certs-from-secret: {{ .Values.route.tls.secretName }}
+  {{- end }}
   labels:
     {{- include "laravel-app.labels" . | nindent 4 }}
 spec:
