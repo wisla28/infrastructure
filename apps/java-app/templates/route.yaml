@@ -17,7 +17,7 @@ spec:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
   host: {{ .Values.route.host }}
-  path: /
+  path: {{ .Values.route.path }}
   port:
     targetPort: http
 {{- end -}}
