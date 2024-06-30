@@ -1,0 +1,16 @@
+replicas: 1
+
+image:
+  repository: rabbitmq
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: '1'
+    memory: 500Mi
+  limits:
+    cpu: '1'
+    memory: 500Mi
+
+route:
+  enabled: true
