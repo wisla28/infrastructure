@@ -1,0 +1,15 @@
+{{- if .Values.certificate -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "universal-app.labels" . | nindent 4 }}
+spec:
+  dnsNames:
+    {{- .Values.certificate.dnsNames | toYaml | nindent 4 }}
+  issuerRef:
+    kind: {{ .Values.certificate.issuer.kind }}
+    name: {{ .Values.certificate.issuer.name }}
+  secretName: {{ .Release.Name }}-tls
+{{- end -}}
