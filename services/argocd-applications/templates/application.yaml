@@ -1,0 +1,29 @@
+---
+{{- range .Values.applications }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .name }}
+  namespace: openshift-operators
+  labels:
+    {{- include "argocd-applications.labels" $ | nindent 4 }}
+spec:
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .namespace }}
+  sources:
+    - repoURL: 'git@gitlab.dreamlink.pl:dreamlink/cloud-infrastructure/helm-charts.git'
+      path: {{ .chart }}
+      targetRevision: main
+      helm:
+        releaseName: {{ .name }}
+        valueFiles:
+        - {{ .values }}
+    - repoURL: 'git@gitlab.dreamlink.pl:dreamlink/cloud-infrastructure/helm-values.git'
+      ref: values
+      targetRevision: main
+{{- end }}
