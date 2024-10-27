@@ -11,19 +11,20 @@ spec:
   project: default
   syncPolicy:
     automated:
+      selfHeal: true
       prune: true
   destination:
     server: https://kubernetes.default.svc
     namespace: {{ .namespace }}
   sources:
-    - repoURL: 'git@gitlab.dreamlink.pl:dreamlink/cloud-infrastructure/helm-charts.git'
+    - repoURL: {{ ((.repositories).charts).url | default $.Values.repositories.charts.url }}
       path: {{ .chart }}
-      targetRevision: main
+      targetRevision: {{ ((.repositories).charts).revision | default $.Values.repositories.charts.revision }}
       helm:
         releaseName: {{ .name }}
         valueFiles:
         - {{ .values }}
-    - repoURL: 'git@gitlab.dreamlink.pl:dreamlink/cloud-infrastructure/helm-values.git'
+    - repoURL: {{ ((.repositories).values).url | default $.Values.repositories.values.url }}
       ref: values
-      targetRevision: main
+      targetRevision: {{ ((.repositories).values).revision | default $.Values.repositories.values.revision }}
 {{- end }}
