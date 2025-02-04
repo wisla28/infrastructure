@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-app
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+data:
+  APP_NAME: {{ $.Values.app.name | quote }}
+  APP_ENV: {{ if eq $.Values.environment "production" -}}"production"{{- else -}}"local"{{- end }}
+  APP_DEBUG: {{ $.Values.app.debug | quote }}
+  APP_URL: {{ $.Values.app.url | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-database
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+data:
+  DB_CONNECTION: {{ $.Values.database.connection | quote }}
+  DB_HOST: {{ $.Values.database.host | quote }}
+  DB_PORT: {{ $.Values.database.port | quote }}
+  DB_DATABASE: {{ $.Values.database.database | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-laravel
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+data:
+  BROADCAST_DRIVER: {{ $.Values.laravel.broadcast_driver | quote }}
+  CACHE_DRIVER: {{ $.Values.laravel.cache_driver | quote }}
+  FILESYSTEM_DISK: {{ $.Values.laravel.filesystem_disk | quote }}
+  QUEUE_CONNECTION: {{ $.Values.laravel.queue_connection | quote }}
+  SESSION_DRIVER: {{ $.Values.laravel.session_driver | quote }}
+  SESSION_LIFETIME: {{ $.Values.laravel.session_lifetime | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-logging
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+data:
+  LOG_CHANNEL: {{ $.Values.logging.channel | quote }}
+  LOG_DEPRECATIONS_CHANNEL: {{ $.Values.logging.deprecations_channel | quote }}
+  LOG_LEVEL: {{ $.Values.logging.level | quote }}
+{{- if .Values.mail.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-mail
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+data:
+  MAIL_MAILER: {{ $.Values.mail.mailer | quote }}
+  MAIL_HOST: {{ $.Values.mail.host | quote }}
+  MAIL_PORT: {{ $.Values.mail.port | quote }}
+  MAIL_ENCRYPTION: {{ $.Values.mail.encryption | quote }}
+  MAIL_FROM_ADDRESS: {{ $.Values.mail.from_address | quote }}
+  MAIL_FROM_NAME: {{ $.Values.mail.from_name | quote }}
+{{- end }}
+{{- if .Values.redis.enabled }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-redis
+  labels:
+    {{- include "laravel-app.labels" . | nindent 4 }}
+data:
+  REDIS_HOST: {{ $.Values.redis.host | quote }}
+  REDIS_PORT: {{ $.Values.redis.port | quote }}
+  REDIS_DB: {{ $.Values.redis.database | quote }}
+  REDIS_CACHE_DB: {{ $.Values.redis.cacheDatabase | quote }}
+{{- end }}

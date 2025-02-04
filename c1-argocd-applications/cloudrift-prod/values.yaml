@@ -1,0 +1,14 @@
+repositories:
+  charts:
+    url: 'git@gitlab.com:projectcloudrift/cloud-infrastructure/helm-charts.git'
+    revision: main
+  values: 
+    url: 'git@gitlab.com:projectcloudrift/cloud-infrastructure/helm-values.git'
+    revision: main
+
+applications:
+  - name: cloudrift-website
+    namespace: cloudrift
+    chart: apps/universal-app
+    values: $values/cloudrift-prod/cloudrift/apps/website/cloudrift-website-app.yaml
+
