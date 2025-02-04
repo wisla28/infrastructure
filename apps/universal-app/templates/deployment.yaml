@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "universal-app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      {{- include "universal-app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "universal-app.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.deployment.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.volumes }}
+      volumes:
+        {{- range $i, $volume := .Values.volumes }}
+        - name: {{ $volume.name }}
+          {{ $volume.volume | toYaml | nindent 10 }}
+        {{- end -}}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: {{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.deployment.image.imagePullPolicy | default "IfNotPresent" }}
+          {{- if or (.Values.deployment.container.ports) }}
+          ports:
+            {{- .Values.deployment.container.ports | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if or (.Values.config) (.Values.secret) }}
+          envFrom:
+            {{- if .Values.config }}
+            - configMapRef:
+                name: {{ .Release.Name }}
+            {{- end }}
+            {{- if .Values.secret }}
+            - secretRef:
+                name: {{ .Release.Name }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.volumes }}
+          volumeMounts:
+            {{- range $i, $volume := .Values.volumes }}
+            - name: {{ $volume.name }}
+              {{ $volume.mount | toYaml | nindent 14 }}
+            {{- end -}}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

@@ -1,0 +1,22 @@
+{{- range $i, $route := .Values.routes }}
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ $.Release.Name }}-{{ $i }}
+  annotations:
+    cert-utils-operator.redhat-cop.io/certs-from-secret: {{ ($route.tls).secretName | default $.Release.Name }}-tls
+  labels:
+    {{- include "universal-app.labels" $ | nindent 4 }}
+spec:
+  to:
+    kind: Service
+    name: {{ $route.service.name | default $.Release.Name }}
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  host: {{ $route.host }}
+  path: {{ $route.path }}
+  port:
+    targetPort: {{ $route.service.port }}
+{{- end }}
